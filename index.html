@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>HOME</title>
+</head>
+<body>
+
+  <form id='homeform'>
+    <p>author: <input type'text' placeholder="authorname"></p>
+    <p>data: <input type'text' placeholder="datatodisplay"></p>
+    <p>type: <input type'text' placeholder="type"></p>
+  </form>
+  <br>
+  <button id="submit">Submit</button>
+  <p id='details'></p>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/4.4.0/firebase.js"></script>
+  <script>
+  // Initialize Firebase
+  var config = {
+    apiKey: "AIzaSyD4Y_RtHIhkzrEBWJG8ADDb_4iidAFrZU4",
+    authDomain: "ard-bits.firebaseapp.com",
+    databaseURL: "https://ard-bits.firebaseio.com",
+    projectId: "ard-bits",
+    storageBucket: "ard-bits.appspot.com",
+    messagingSenderId: "895100654158"
+  };
+  firebase.initializeApp(config);
+
+  var dbref = firebase.database().ref().child('debug').child('home');
+  var datatodisplay="<ol>";
+  var idnum=0;
+  var delstr = 'deleteclass';
+  dbref.on('value', function(snapshot){
+    snapshot.forEach(function(item){
+        var dict = item.val();
+        var date = dict['date'];
+        var author = dict['author'];
+        var data = dict['data'];
+        var type = dict['type'];
+        datatodisplay += "<li><ul>"
+        datatodisplay += "<li>"+"author : "+ author +"</li>";
+        datatodisplay += "<li>"+"data : "+ data +"</li>";
+        datatodisplay += "<li>"+"date : "+ date['date'] + "/" + date['month'] + "/" + date['year'] + "</li>";
+        datatodisplay += "<li>"+ "<button class="+delstr+" id="+item.key+">DELETE</button>" +"</li>";
+        idnum++;
+        datatodisplay += "</ul></li>";
+    });
+    datatodisplay += "</ol>";
+    document.getElementById("details").innerHTML = datatodisplay;
+    $(".deleteclass").click(function(){
+      console.log(this.id+'');
+      datatodisplay = '<ol>';
+      dbref.child(this.id).remove();
+    });
+  //console.log('val: ' + snapshot.val());
+  });
+
+  var author_i;
+  var data_i;
+  var date_i={};
+  var type_i;
+  $('#submit').click(function(){
+    console.log('lol');
+    author_i = document.getElementById('homeform').elements[0].value;
+    data_i = document.getElementById('homeform').elements[1].value;
+    type_i = document.getElementById('homeform').elements[2].value;
+    var dateObj = new Date();
+    date_i['date'] = dateObj.getUTCDate();
+    date_i['day'] = dateObj.getDay();
+    date_i['hours'] = dateObj.getHours();
+    date_i['minutes'] = dateObj.getMinutes();
+    date_i['month'] = dateObj.getUTCMonth() + 1; //months from 1-12
+    date_i['seconds'] = dateObj.getSeconds();
+    date_i['time'] = dateObj.getTime();
+    date_i['timezoneOffset'] = dateObj.getTimezoneOffset();
+    date_i['year'] = dateObj.getUTCFullYear();
+    console.log(date_i);
+    datatodisplay="<ol>";
+    dbref.push({
+      author: author_i,
+      data: data_i,
+      date: date_i,
+      type: parseInt(type_i)
+    });
+  });
+  </script>
+</body>
+</html>
